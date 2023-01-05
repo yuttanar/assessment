@@ -37,7 +37,7 @@ func main() {
 	// Start go server
 	go func() {
 		if err := e.Start(PORT); err != nil && err != http.ErrServerClosed {
-			e.Logger.Fatal("shutting down the server")
+			e.Logger.Fatal("shutting down the server", err)
 		}
 	}()
 
