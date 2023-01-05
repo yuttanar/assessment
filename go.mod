@@ -2,7 +2,10 @@ module github.com/yuttanar/assessment
 
 go 1.19
 
-require github.com/labstack/echo/v4 v4.10.0
+require (
+	github.com/labstack/echo/v4 v4.10.0
+	github.com/lib/pq v1.10.7
+)
 
 require (
 	github.com/labstack/gommon v0.4.0 // indirect
