@@ -1,6 +1,8 @@
 package expense
 
-import "github.com/lib/pq"
+import (
+	"github.com/lib/pq"
+)
 
 type Expense struct {
 	ID     int            `json:"id"`
