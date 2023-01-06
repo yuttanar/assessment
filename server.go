@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"regexp"
 	"syscall"
 	"time"
 
@@ -22,7 +23,7 @@ func main() {
 		fmt.Println("Please set ENV 'DATABASE_URL' before start the server.")
 		return
 	}
-	if PORT == "" {
+	if PORT == "" || !checkPortPatternMatch(PORT) {
 		PORT = ":2565"
 	}
 	if !checkPortIsBeingUsed(PORT) {
@@ -67,4 +68,9 @@ func checkPortIsBeingUsed(port string) bool {
 	}
 	defer ln.Close()
 	return true
+}
+
+func checkPortPatternMatch(port string) bool {
+	re := regexp.MustCompile(`^:((6553[0-5])|(655[0-2][0-9])|(65[0-4][0-9]{2})|(6[0-4][0-9]{3})|([1-5][0-9]{4})|([0-5]{0,5})|([0-9]{1,4}))$`)
+	return re.MatchString(port)
 }

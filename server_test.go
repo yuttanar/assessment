@@ -16,5 +16,12 @@ func TestCheckPortIsBeingUsed(t *testing.T) {
 	defer ln.Close()
 
 	assert.False(t, checkPortIsBeingUsed(port), "they should be false")
+}
 
+func TestCheckPortPatternMatch(t *testing.T) {
+	assert.True(t, checkPortPatternMatch(":12565"), "they should be true")
+	assert.True(t, checkPortPatternMatch(":2565"), "they should be true")
+	assert.False(t, checkPortPatternMatch(":256500"), "they should be false")
+	assert.False(t, checkPortPatternMatch("2565"), "they should be false")
+	assert.False(t, checkPortPatternMatch(":32f5"), "they should be false")
 }
