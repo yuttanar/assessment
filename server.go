@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"net"
 	"net/http"
 	"os"
 	"os/signal"
@@ -23,6 +24,10 @@ func main() {
 	}
 	if PORT == "" {
 		PORT = ":2565"
+	}
+	if !checkPortIsBeingUsed(PORT) {
+		fmt.Printf("Port %s is being used , Please use another port.", PORT)
+		return
 	}
 
 	expense.InitDB()
@@ -53,4 +58,13 @@ func main() {
 		e.Logger.Fatal(err)
 	}
 
+}
+
+func checkPortIsBeingUsed(port string) bool {
+	ln, err := net.Listen("tcp", port)
+	if err != nil {
+		return false
+	}
+	defer ln.Close()
+	return true
 }
