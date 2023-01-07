@@ -51,6 +51,15 @@ func TestGetExpenseByID(t *testing.T) {
 	assert.ElementsMatch(t, ep.Tags, latest.Tags)
 }
 
+func TestGetAllExpenses(t *testing.T) {
+	expenses := []Expense{}
+	res := request(http.MethodGet, uri("expenses"), nil)
+	err := res.Decode(&expenses)
+
+	assert.Nil(t, err)
+	assert.Equal(t, http.StatusOK, res.StatusCode)
+}
+
 func TestUpdateExpenseByID(t *testing.T) {
 	oldEp := seedExpense(t)
 	var epUpdated = &Expense{
