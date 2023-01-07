@@ -44,6 +44,7 @@ func main() {
 	e.POST("/expenses", app.CreateExpenseHandler)
 	e.GET("/expenses/:id", app.GetExpenseHandler)
 	e.PUT("/expenses/:id", app.UpdateExpenseHandler)
+	e.GET("/expenses", app.GetExpensesHandler)
 
 	// Start go server
 	go func() {
