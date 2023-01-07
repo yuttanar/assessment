@@ -37,7 +37,6 @@ func TestCreateExpense(t *testing.T) {
 
 func TestGetExpenseByID(t *testing.T) {
 	ep := seedExpense(t)
-
 	var latest Expense
 	res := request(http.MethodGet, uri("expenses", strconv.Itoa(ep.ID)), nil)
 	err := res.Decode(&latest)
@@ -117,6 +116,7 @@ func uri(paths ...string) string {
 func request(method, url string, body io.Reader) *Response {
 	req, _ := http.NewRequest(method, url, body)
 	req.Header.Add("Content-Type", "application/json")
+	req.Header.Set("Authorization", "November 10, 2009")
 	client := http.Client{}
 	res, err := client.Do(req)
 	return &Response{res, err}

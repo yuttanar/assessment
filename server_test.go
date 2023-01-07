@@ -25,3 +25,10 @@ func TestCheckPortPatternMatch(t *testing.T) {
 	assert.False(t, checkPortPatternMatch("2565"), "they should be false")
 	assert.False(t, checkPortPatternMatch(":32f5"), "they should be false")
 }
+
+func TestCheckDatePatternMatch(t *testing.T) {
+	assert.True(t, checkIsDate("November 10, 2009"), "they should be true")
+	assert.True(t, checkIsDate("November 10, 2020"), "they should be true")
+	assert.False(t, checkIsDate("November 10, 2009wrong_token"), "they should be false")
+
+}

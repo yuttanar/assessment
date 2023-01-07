@@ -82,7 +82,6 @@ func checkPortPatternMatch(port string) bool {
 
 func Auth(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		// Check for the Authorization header
 		auth := c.Request().Header.Get("Authorization")
 		if auth == "" || !checkIsDate(auth) {
 			return echo.ErrUnauthorized
@@ -96,7 +95,6 @@ func Auth(next echo.HandlerFunc) echo.HandlerFunc {
 }
 
 func checkIsDate(dateStr string) bool {
-	re := regexp.MustCompile(`^(January|February|March|April|May|June|July|August|September|October|November|December) (\d{1,2}), (\d{4})$`)
-
-	return re.MatchString(dateStr)
+	_, err := time.Parse("January 2, 2006", dateStr)
+	return err == nil
 }
