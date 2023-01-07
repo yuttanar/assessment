@@ -40,7 +40,9 @@ func main() {
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 
-	e.POST("/expenses", expense.CreateExpenseHandler)
+	app := &expense.Api{Db: expense.Db}
+	e.POST("/expenses", app.CreateExpenseHandler)
+	e.GET("/expenses/:id", app.GetExpenseHandler)
 
 	// Start go server
 	go func() {
