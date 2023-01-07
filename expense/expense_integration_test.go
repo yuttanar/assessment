@@ -35,7 +35,7 @@ func TestCreateExpense(t *testing.T) {
 	assert.ElementsMatch(t, []string{"food", "beverage"}, ep.Tags)
 }
 
-func TestGetUserByID(t *testing.T) {
+func TestGetExpenseByID(t *testing.T) {
 	ep := seedExpense(t)
 
 	var latest Expense
@@ -49,6 +49,34 @@ func TestGetUserByID(t *testing.T) {
 	assert.Equal(t, ep.Amount, latest.Amount)
 	assert.Equal(t, ep.Note, latest.Note)
 	assert.ElementsMatch(t, ep.Tags, latest.Tags)
+}
+
+func TestUpdateExpenseByID(t *testing.T) {
+	oldEp := seedExpense(t)
+	var epUpdated = &Expense{
+		ID:     oldEp.ID,
+		Title:  "apple smoothie",
+		Amount: 89,
+		Note:   "no discount",
+		Tags:   []string{"beverage"},
+	}
+	var latest Expense
+	body := bytes.NewBufferString(`{
+		"title": "apple smoothie",
+		"amount": 89,
+		"note": "no discount", 
+		"tags": ["beverage"]
+	}`)
+	res := request(http.MethodPut, uri("expenses", strconv.Itoa(oldEp.ID)), body)
+	err := res.Decode(&latest)
+
+	assert.Nil(t, err)
+	assert.Equal(t, http.StatusOK, res.StatusCode)
+	assert.Equal(t, epUpdated.ID, latest.ID)
+	assert.Equal(t, epUpdated.Title, latest.Title)
+	assert.Equal(t, epUpdated.Amount, latest.Amount)
+	assert.Equal(t, epUpdated.Note, latest.Note)
+	assert.ElementsMatch(t, epUpdated.Tags, latest.Tags)
 }
 
 func seedExpense(t *testing.T) Expense {

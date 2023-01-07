@@ -52,7 +52,7 @@ func TestShouldGetExpense(t *testing.T) {
 }
 
 func TestShouldCreateExpense(t *testing.T) {
-	var expenseReqJSON string = `{"id":1,"title":"strawberry smoothie","amount":79,"note":"night market promotion discount 10 bath","tags":["food","beverage"]}`
+	var expenseReqJSON string = `{"title":"strawberry smoothie","amount":79,"note":"night market promotion discount 10 bath","tags":["food","beverage"]}`
 	e := echo.New()
 	req := httptest.NewRequest(http.MethodPost, "/expenses", strings.NewReader(expenseReqJSON))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
@@ -75,5 +75,42 @@ func TestShouldCreateExpense(t *testing.T) {
 	if assert.NoError(t, app.CreateExpenseHandler(c)) {
 		assert.Equal(t, http.StatusCreated, rec.Code)
 		assert.Equal(t, expenseJSON, strings.TrimSpace(rec.Body.String()))
+	}
+}
+
+func TestShouldUpdateExpense(t *testing.T) {
+	var expenseReqJSON string = `{"title":"apple smoothie","amount":89,"note":"no discount","tags":["beverage"]}`
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodPut, "/", strings.NewReader(expenseReqJSON))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rec := httptest.NewRecorder()
+	var epUpdated = &Expense{
+		ID:     1,
+		Title:  "apple smoothie",
+		Amount: 89,
+		Note:   "no discount",
+		Tags:   []string{"beverage"},
+	}
+	row := sqlmock.NewRows([]string{"id", "title", "amount", "note", "tags"}).AddRow(epUpdated.ID, epUpdated.Title, epUpdated.Amount, epUpdated.Note, epUpdated.Tags)
+
+	Db, mock, err := sqlmock.New()
+	if err != nil {
+		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+	}
+	defer Db.Close()
+
+	mock.ExpectQuery("UPDATE expenses SET (.+) WHERE id = (.+) RETURNING (.+)").WithArgs(epUpdated.Title, epUpdated.Amount, epUpdated.Note, epUpdated.Tags, "1").WillReturnRows(row)
+	var expenseUpdatedJSON string = `{"id":1,"title":"apple smoothie","amount":89,"note":"no discount","tags":["beverage"]}`
+
+	app := &Api{Db}
+
+	c := e.NewContext(req, rec)
+	c.SetPath("/expenses/:id")
+	c.SetParamNames("id")
+	c.SetParamValues("1")
+
+	if assert.NoError(t, app.UpdateExpenseHandler(c)) {
+		assert.Equal(t, http.StatusOK, rec.Code)
+		assert.Equal(t, expenseUpdatedJSON, strings.TrimSpace(rec.Body.String()))
 	}
 }
