@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -32,6 +33,38 @@ func TestCreateExpense(t *testing.T) {
 	assert.Equal(t, 79.00, ep.Amount)
 	assert.Equal(t, "night market promotion discount 10 bath", ep.Note)
 	assert.ElementsMatch(t, []string{"food", "beverage"}, ep.Tags)
+}
+
+func TestGetUserByID(t *testing.T) {
+	ep := seedExpense(t)
+
+	var latest Expense
+	res := request(http.MethodGet, uri("expenses", strconv.Itoa(ep.ID)), nil)
+	err := res.Decode(&latest)
+
+	assert.Nil(t, err)
+	assert.Equal(t, http.StatusOK, res.StatusCode)
+	assert.Equal(t, ep.ID, latest.ID)
+	assert.Equal(t, ep.Title, latest.Title)
+	assert.Equal(t, ep.Amount, latest.Amount)
+	assert.Equal(t, ep.Note, latest.Note)
+	assert.ElementsMatch(t, ep.Tags, latest.Tags)
+}
+
+func seedExpense(t *testing.T) Expense {
+	var ep Expense
+	body := bytes.NewBufferString(`{
+		"title": "strawberry smoothie",
+		"amount": 79,
+		"note": "night market promotion discount 10 bath", 
+		"tags": ["food", "beverage"]
+	}`)
+
+	err := request(http.MethodPost, uri("expenses"), body).Decode(&ep)
+	if err != nil {
+		t.Fatal("can't create expense:", err)
+	}
+	return ep
 }
 
 func uri(paths ...string) string {
