@@ -35,7 +35,7 @@ func TestCreateExpense(t *testing.T) {
 	assert.ElementsMatch(t, []string{"food", "beverage"}, ep.Tags)
 }
 
-func TestGetUserByID(t *testing.T) {
+func TestGetExpenseByID(t *testing.T) {
 	ep := seedExpense(t)
 
 	var latest Expense

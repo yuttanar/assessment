@@ -43,6 +43,7 @@ func main() {
 	app := &expense.Api{Db: expense.Db}
 	e.POST("/expenses", app.CreateExpenseHandler)
 	e.GET("/expenses/:id", app.GetExpenseHandler)
+	e.PUT("/expenses/:id", app.UpdateExpenseHandler)
 
 	// Start go server
 	go func() {
