@@ -22,3 +22,22 @@ func (a *Api) GetExpenseHandler(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, Err{Message: "can't scan expense:" + err.Error()})
 	}
 }
+
+func (a *Api) GetExpensesHandler(c echo.Context) error {
+	rows, err := a.Db.Query("SELECT id, title, amount , note , tags FROM expenses")
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, Err{Message: "can't query all expenses:" + err.Error()})
+	}
+
+	expenses := []Expense{}
+	for rows.Next() {
+		ep := Expense{}
+		err := rows.Scan(&ep.ID, &ep.Title, &ep.Amount, &ep.Note, &ep.Tags)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, Err{Message: "can't scan expense:" + err.Error()})
+		}
+		expenses = append(expenses, ep)
+	}
+
+	return c.JSON(http.StatusOK, expenses)
+}
