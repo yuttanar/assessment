@@ -4,17 +4,51 @@ package expense
 
 import (
 	"bytes"
+	"database/sql"
 	"encoding/json"
 	"io"
+	"log"
+	"net"
 	"net/http"
+	"os"
+	"time"
+
 	"strconv"
 	"strings"
 	"testing"
+
+	"github.com/labstack/echo/v4"
 
 	"github.com/stretchr/testify/assert"
 )
 
 func TestCreateExpense(t *testing.T) {
+	eh := echo.New()
+	go func(e *echo.Echo) {
+		db, err := sql.Open("postgres", os.Getenv("DATABASE_URL"))
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		app := &Api{Db: db}
+
+		e.POST("/expenses", app.CreateExpenseHandler)
+		e.GET("/expenses/:id", app.GetExpenseHandler)
+		e.PUT("/expenses/:id", app.UpdateExpenseHandler)
+		e.GET("/expenses", app.GetExpensesHandler)
+		e.Start(":2565")
+	}(eh)
+	for {
+		conn, err := net.DialTimeout("tcp", "localhost:2565", 30*time.Second)
+		if err != nil {
+			log.Println(err)
+		}
+		if conn != nil {
+			conn.Close()
+			break
+		}
+	}
+
 	body := bytes.NewBufferString(`{
 		"title": "strawberry smoothie",
 		"amount": 79,
@@ -36,6 +70,32 @@ func TestCreateExpense(t *testing.T) {
 }
 
 func TestGetExpenseByID(t *testing.T) {
+	eh := echo.New()
+	go func(e *echo.Echo) {
+		db, err := sql.Open("postgres", os.Getenv("DATABASE_URL"))
+		if err != nil {
+			log.Fatal("db", err)
+		}
+
+		app := &Api{Db: db}
+
+		e.POST("/expenses", app.CreateExpenseHandler)
+		e.GET("/expenses/:id", app.GetExpenseHandler)
+		e.PUT("/expenses/:id", app.UpdateExpenseHandler)
+		e.GET("/expenses", app.GetExpensesHandler)
+		e.Start(":2565")
+	}(eh)
+	for {
+		conn, err := net.DialTimeout("tcp", "localhost:2565", 30*time.Second)
+		if err != nil {
+			log.Println(err)
+		}
+		if conn != nil {
+			conn.Close()
+			break
+		}
+	}
+
 	ep := seedExpense(t)
 	var latest Expense
 	res := request(http.MethodGet, uri("expenses", strconv.Itoa(ep.ID)), nil)
@@ -51,6 +111,32 @@ func TestGetExpenseByID(t *testing.T) {
 }
 
 func TestGetAllExpenses(t *testing.T) {
+	eh := echo.New()
+	go func(e *echo.Echo) {
+		db, err := sql.Open("postgres", os.Getenv("DATABASE_URL"))
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		app := &Api{Db: db}
+
+		e.POST("/expenses", app.CreateExpenseHandler)
+		e.GET("/expenses/:id", app.GetExpenseHandler)
+		e.PUT("/expenses/:id", app.UpdateExpenseHandler)
+		e.GET("/expenses", app.GetExpensesHandler)
+		e.Start(":2565")
+	}(eh)
+	for {
+		conn, err := net.DialTimeout("tcp", "localhost:2565", 30*time.Second)
+		if err != nil {
+			log.Println(err)
+		}
+		if conn != nil {
+			conn.Close()
+			break
+		}
+	}
+
 	expenses := []Expense{}
 	res := request(http.MethodGet, uri("expenses"), nil)
 	err := res.Decode(&expenses)
@@ -60,6 +146,32 @@ func TestGetAllExpenses(t *testing.T) {
 }
 
 func TestUpdateExpenseByID(t *testing.T) {
+	eh := echo.New()
+	go func(e *echo.Echo) {
+		db, err := sql.Open("postgres", os.Getenv("DATABASE_URL"))
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		app := &Api{Db: db}
+
+		e.POST("/expenses", app.CreateExpenseHandler)
+		e.GET("/expenses/:id", app.GetExpenseHandler)
+		e.PUT("/expenses/:id", app.UpdateExpenseHandler)
+		e.GET("/expenses", app.GetExpensesHandler)
+		e.Start(":2565")
+	}(eh)
+	for {
+		conn, err := net.DialTimeout("tcp", "localhost:2565", 30*time.Second)
+		if err != nil {
+			log.Println(err)
+		}
+		if conn != nil {
+			conn.Close()
+			break
+		}
+	}
+
 	oldEp := seedExpense(t)
 	var epUpdated = &Expense{
 		ID:     oldEp.ID,
@@ -72,7 +184,7 @@ func TestUpdateExpenseByID(t *testing.T) {
 	body := bytes.NewBufferString(`{
 		"title": "apple smoothie",
 		"amount": 89,
-		"note": "no discount", 
+		"note": "no discount",
 		"tags": ["beverage"]
 	}`)
 	res := request(http.MethodPut, uri("expenses", strconv.Itoa(oldEp.ID)), body)
@@ -92,7 +204,7 @@ func seedExpense(t *testing.T) Expense {
 	body := bytes.NewBufferString(`{
 		"title": "strawberry smoothie",
 		"amount": 79,
-		"note": "night market promotion discount 10 bath", 
+		"note": "night market promotion discount 10 bath",
 		"tags": ["food", "beverage"]
 	}`)
 
