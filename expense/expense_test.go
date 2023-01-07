@@ -114,3 +114,31 @@ func TestShouldUpdateExpense(t *testing.T) {
 		assert.Equal(t, expenseUpdatedJSON, strings.TrimSpace(rec.Body.String()))
 	}
 }
+
+func TestShouldGetExpenses(t *testing.T) {
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodGet, "/expenses", nil)
+	rec := httptest.NewRecorder()
+
+	rows := sqlmock.NewRows([]string{"id", "title", "amount", "note", "tags"}).
+		AddRow(ep.ID, ep.Title, ep.Amount, ep.Note, ep.Tags)
+
+	Db, mock, err := sqlmock.New()
+	if err != nil {
+		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+	}
+	defer Db.Close()
+
+	mock.ExpectQuery("SELECT (.+) FROM expenses").WillReturnRows(rows)
+	expensesJSON := `[{"id":1,"title":"strawberry smoothie","amount":79,"note":"night market promotion discount 10 bath","tags":["food","beverage"]}]`
+
+	app := &Api{Db}
+
+	c := e.NewContext(req, rec)
+
+	if assert.NoError(t, app.GetExpensesHandler(c)) {
+		assert.Equal(t, http.StatusOK, rec.Code)
+		assert.Equal(t, expensesJSON, strings.TrimSpace(rec.Body.String()))
+	}
+}
