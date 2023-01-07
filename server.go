@@ -39,6 +39,7 @@ func main() {
 	e := echo.New()
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
+	e.Use(Auth)
 
 	app := &expense.Api{Db: expense.Db}
 	e.POST("/expenses", app.CreateExpenseHandler)
@@ -77,4 +78,25 @@ func checkPortIsBeingUsed(port string) bool {
 func checkPortPatternMatch(port string) bool {
 	re := regexp.MustCompile(`^:((6553[0-5])|(655[0-2][0-9])|(65[0-4][0-9]{2})|(6[0-4][0-9]{3})|([1-5][0-9]{4})|([0-5]{0,5})|([0-9]{1,4}))$`)
 	return re.MatchString(port)
+}
+
+func Auth(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		// Check for the Authorization header
+		auth := c.Request().Header.Get("Authorization")
+		if auth == "" || !checkIsDate(auth) {
+			return echo.ErrUnauthorized
+		}
+
+		if err := next(c); err != nil {
+			c.Error(err)
+		}
+		return nil
+	}
+}
+
+func checkIsDate(dateStr string) bool {
+	re := regexp.MustCompile(`^(January|February|March|April|May|June|July|August|September|October|November|December) (\d{1,2}), (\d{4})$`)
+
+	return re.MatchString(dateStr)
 }
