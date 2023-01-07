@@ -1,3 +1,29 @@
+# How to use
+
+## To start server
+
+```console
+DATABASE_URL=postgres://... PORT=:2565 go run server.go
+```
+
+## To run unit test
+
+```console
+go test -v ./...
+```
+## To run integration test
+
+```console
+docker-compose up --build --abort-on-container-exit --exit-code-from expense_app
+```
+
+## To tear down integration test
+
+```console
+docker-compose down
+```
+
+
 # Prerequisites
 * โปรเจคตั้งต้นคือ[โปรเจคนี้](https://github.com/KKGo-Software-engineering/assessment)
 * กำหนดให้ส่งลิ้งค์คำตอบคือ github repository ที่เก็บโค้ดของคุณ `https://github.com/<your github name>/assessment`
